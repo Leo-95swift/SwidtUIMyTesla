@@ -7,170 +7,245 @@
 
 import SwiftUI
 
-struct ClimatControlView: View {
-    
-    @GestureState private var gestureOffset = CGSize.zero
-    @State private var currentMenuOffsetY: CGFloat = 0.0
-    @State private var lastMenuOffsetY: CGFloat = 0.0
-    
-    @State var startColor = Color.start
-    @State var endColor = Color.end
-    
-    @State private var acClimate: Double = 24.0
-    @State private var fanClimate: Double = 0.0
-    @State private var heatClimate: Double = 0.0
-    @State private var autoClimate: Double = 0.0
-    
-    @State private var isACOn: Bool = true
+struct ClimateControlView: View {
     
     var body: some View {
-        ZStack {
-            mainView
-                .ignoresSafeArea(edges: .top)
-            bottomSheetView
-                .padding()
-                .frame(height: UIScreen.main.bounds.height + 250)
-                .background(RoundedRectangle(cornerRadius: 20).fill(.alert))
-                .ignoresSafeArea(.all, edges: .bottom)
-                .offset(y: UIScreen.main.bounds.height)
-                .offset(y: currentMenuOffsetY)
-                .gesture(dragGesture)
-        }
-        .navigationBarBackButtonHidden(true)
-    }
-
-    
-    private var mainView: some View {
-        VStack {
+        backgroundStackView(color: climateBackgroundGradient) {
             ZStack {
-                Color(.lockButtonGradientTop)
-                
-                VStack(spacing: 5) {
-                    Text("Climate")
-                        .font(.title)
-                        .foregroundColor(.textGray)
-                        .padding()
-                    displayView
-                    DisclosureGroup {
-                        VStack(spacing: 0) {
-                            acSliderView
-                            fanSliderView
-                            heatSliderView
-                        }
-                        
-                    } label: {
-                        Text("Climate control")
-                            .foregroundColor(.textGray)
-                    }.padding()
+                VStack {
+                    Spacer()
+                        .frame(height: 60)
+                    NavigationBarView(headerText: "CLIMATE", isTapped: $shouldShowAlert)
+                    Spacer()
+                        .frame(height: 80)
+                    indicatorView
+                    Spacer()
+                        .frame(height: 60)
+                    slidersView
                     Spacer()
                 }
+                .blur(radius: shouldShowAlert ? 10 : 0)
+                .frame(height: UIScreen.main.bounds.height)
+                bottomSheetView
+                    .frame(height: UIScreen.main.bounds.height + 250)
+                    .background(RoundedRectangle(cornerRadius: 40).fill(.lockButtonGradientBottom))
+                    .ignoresSafeArea(.all, edges: .bottom)
+                    .offset(y: UIScreen.main.bounds.height)
+                    .offset(y: currentSettingsOffsetY)
+                    .gesture(dragGesture)
+                    .blur(radius: shouldShowAlert ? 10 : 0)
+                if shouldShowAlert {
+                    alertView
+                        .transition(.asymmetric(insertion: .scale, removal: .opacity))
+                        .zIndex(1)
+                }
             }
-        }.padding(.top, 200)
+            
+        }
+        .navigationBarBackButtonHidden(true)
+        
+        
     }
+    
+    
+    @Environment(\.dismiss) private var dismiss
+    @GestureState private var gestureOffset = CGSize.zero
+    @State private var currentSettingsOffsetY: CGFloat = 0.0
+    @State private var lastSettingsOffsetY: CGFloat = 0.0
+    @State private var acOffset = 0.0
+    @State private var fanOffset = 0.0
+    @State private var heatOffset = 0.0
+    @State private var autoOffset = 0.0
+    @State private var sliderValue = 15
+    @State private var acValue: Double = 15.0
+    @State private var fanValue: Double = 0.0
+    @State private var heatValue: Double = 0.0
+    @State private var autoValue: Double = 0.0
+    @State private var isExpanded = true
+    @State private var isACOn: Bool = false
+    @State private var shouldShowAlert = false
+    @State private var mainColor = Color.topGradient
     
     private var bottomSheetView: some View {
         VStack {
             bottomSheetHeaderView
             controlButtonsView
-            colorsSelecterView
             Spacer()
         }
     }
     
-    private var displayView: some View {
+    private var indicatorView: some View {
         ZStack {
             Circle()
-                .stroke(lineWidth: 20)
-                .opacity(0.3)
-                .foregroundColor(Color.gray)
-            
-            Circle()
-                .trim(from: 0.0, to: CGFloat((acClimate - 16) / 24))
-                .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round))
-                .foregroundColor(acClimate < 24 ? startColor : endColor
-                )
+                .trim(from: 0.0, to: CGFloat((acValue - 15) / 15))
+                .stroke(style: StrokeStyle(lineWidth: 25, lineCap: .round))
+                .foregroundColor(mainColor)
                 .rotationEffect(Angle(degrees: -90))
+                .frame(width: 192, height: 192)
+                .zIndex(1)
+                .opacity(isACOn ? 1 : 0)
+                .shadow(color: mainColor, radius: 10, x: 0, y: 0)
+            Circle()
+                .fill(climateIndicatorGradient)
+                .frame(width: 185, height: 185)
+                .climateCircleIndicatorConfiguration()
+            Circle()
+                .fill(
+                    .darkShadow
+                        .shadow(.inner(color: .circleButtonGradientTop.opacity(0.6), radius: 50, x: -80, y: -80))
+                    
+                )
+                .overlay {
+                    Text("\(acValue.description.prefix(2))° C")
+                        .font(.system(size: 30, weight: .bold))
+                        .opacity(isACOn ? 1 : 0)
+                        .animation(.default)
+                }
+                .frame(width: 130, height: 130)
+                .background(Circle().stroke(.climateIndicatorMiddle, lineWidth: 1))
+                .circleButtonConfiguration()
             
-            Text("\(Int(acClimate))° C")
-                .foregroundColor(.white)
-                .font(.largeTitle)
-                .bold()
         }
-        .frame(width: 200, height: 200)
-        .padding(50)
+    }
+    
+    private var slidersView: some View {
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(spacing: 20) {
+                acSliderView
+                fanSliderView
+                heatSliderView
+                autoSliderView
+            }
+            
+        } label: {
+        }
+        .padding(.horizontal)
+        
     }
     
     private var acSliderView: some View {
             HStack {
                 Text("A/C")
-                    .foregroundColor(.textGray)
-                
+                    .frame(width: 50)
+                Spacer()
+                    .frame(width: 20)
                 Button {
                     
                 } label: {
-                    Image(.acIcon)
+                    Image("acImage")
+                        .renderingMode(.template)
+                        .foregroundColor(isACOn ? .topGradient : .textGray)
                 }
+                .climateCircleSettingConfiguration()
 
-                Slider(value: $acClimate, in: 16...40, step: 1)
-                    .accentColor(acClimate < 24 ? startColor : endColor)
-                    .padding()
-                    
+                Spacer()
+                ClmateCustomSLider(value: $acValue, minValue: 15, maxValue: 30, offset: $acOffset, sliderProgressColor: $mainColor)
+                    .frame(width: 190)
+                Spacer()
+                    .frame(width: 20)
+
+                
         }
-        .foregroundColor(.textGray)
+            .disabled(!isACOn)
+            .padding(.top, 10)
+            .foregroundColor(.gray)
     }
     
     private var fanSliderView: some View {
             HStack {
                 Text("Fan")
-                    .foregroundColor(.textGray)
-                
+                    .frame(width: 50)
+                Spacer()
+                    .frame(width: 20)
                 Button {
                     
                 } label: {
-                    Image(.fanIcon)
+                    Image("fanImage")
                 }
+                .climateCircleSettingConfiguration()
 
-                Slider(value: $fanClimate, in: 16...40, step: 1)
-                    .padding()
+
+                Spacer()
+                ClmateCustomSLider(value: $fanValue, minValue: 15, maxValue: 30, offset: $fanOffset, sliderProgressColor: $mainColor)
+                    .frame(width: 190)
+                Spacer()
+                    .frame(width: 20)
                     
         }
-        .foregroundColor(.textGray)
+        .foregroundColor(.gray)
+        .padding(.top, 10)
+        .disabled(!isACOn)
+
     }
     
     private var heatSliderView: some View {
             HStack {
                 Text("Heat")
-                    .foregroundColor(.textGray)
-                
+                    .frame(width: 50)
+                Spacer()
+                    .frame(width: 20)
                 Button {
                     
                 } label: {
-                    Image(.heatIcon)
+                    Image("heatImage")
                 }
-
-                Slider(value: $heatClimate, in: 16...40, step: 1)
-                    .padding()
+                .climateCircleSettingConfiguration()
+                Spacer()
+                ClmateCustomSLider(value: $heatValue, minValue: 15, maxValue: 30, offset: $heatOffset, sliderProgressColor: $mainColor)
+                    .frame(width: 190)
+                Spacer()
+                    .frame(width: 20)
                     
         }
-        .foregroundColor(.textGray)
+        .foregroundColor(.gray)
+        .padding(.top, 10)
+        .disabled(!isACOn)
+
+    }
+    
+    private var autoSliderView: some View {
+            HStack {
+                Text("Auto")
+                    .frame(width: 50)
+                Spacer()
+                    .frame(width: 20)
+                Button {
+                } label: {
+                    Image("autoImage")
+                }
+                .climateCircleSettingConfiguration()
+
+                Spacer()
+                ClmateCustomSLider(value: $autoValue, minValue: 15, maxValue: 30, offset: $autoOffset, sliderProgressColor: $mainColor)
+                    .frame(width: 190)
+                Spacer()
+                    .frame(width: 20)
+                    
+        }
+        .foregroundColor(.gray)
+        .padding(.vertical, 10)
+        .disabled(!isACOn)
+
     }
 
     private var bottomSheetHeaderView: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.clear)
-                .frame(height: 100)
-                .cornerRadius(20)
-                .padding(.horizontal)
-            HStack(spacing: 50) {
-                VStack(alignment: .leading) {
-                    Text("A/C is On")
+        VStack {
+            Capsule()
+                .fill(.black)
+                .frame(width: 80, height: 4)
+            HStack {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("A/C is \(isACOn ? "ON" : "OFF")")
+                        .fontWeight(.heavy)
                         .foregroundColor(.white)
-                    Text("Tap to turn off or swipe down")
+                    Text("Tap to turn off or swipe up \nfor a fast setup")
                         .foregroundColor(.gray)
                 }
+                Spacer()
                 Button {
-                    
+                    withAnimation {
+                        isACOn.toggle()
+                    }
                 } label: {
                     Image(systemName: "power")
                         .frame(width: 60, height: 60)
@@ -189,107 +264,140 @@ struct ClimatControlView: View {
                             
                         )
                 }
+                .shadow(color: .darkShadow, radius: 6, x: 0, y: 0)
             }
         }
+        .padding(.top)
+        .padding(.horizontal)
     }
     
     private var controlButtonsView: some View {
-        // Кнопки контроля
-        
-        HStack(spacing: 30) {
-            // on - off
-            VStack(spacing: 30) {
-                Button {
-                    
-                } label: {
-                    Image(.power)
-                }
-                
+        HStack(alignment: .top,spacing: 50) {
+            VStack(alignment: .leading) {
+                Spacer()
+                    .frame(height: 15)
+                ColorPicker("", selection: $mainColor)
+                    .frame(width: 20)
+                Spacer()
+                    .frame(height: 40)
                 Text("On")
-                    .foregroundColor(.gray)
+                    .font(.system(size: 20))
             }
-            
-            // цельсус
-            
-            HStack(spacing: 20) {
+            .frame(height: 90)
+            HStack() {
                 Button {
-                    acClimate -= 1
+                    guard acValue > 15 else { return }
+                    withAnimation {
+                        acValue -= 1
+                        acOffset -= 11
+                    }
                 } label: {
                     Image(.left)
                 }
+                .disabled(!isACOn)
                 
-                Text("\(Int(acClimate))° C")
+                Text("\(Int(acValue))°")
                     .font(.system(size: 34))
                     .foregroundColor(.white)
-                
+                    .frame(width: 60)
                 Button {
-                    acClimate += 1
+                    guard acValue < 30 else { return }
+                    withAnimation {
+                        acValue += 1
+                        acOffset += 11
+                    }
                 } label: {
                     Image(.right)
                 }
+                .disabled(!isACOn)
+
             }
-            
-            // vent
-            VStack(spacing: 30) {
+            VStack() {
+                Spacer()
+                    .frame(height: 15)
                 Button {
-                    
                 } label: {
                     Image(.vent)
                 }
-                
+                Spacer()
+                    .frame(height: 40)
                 Text("Vent")
-                    .foregroundColor(.gray)
             }
+            .frame(height: 80)
         }
+        .frame(height: 100)
+        .padding()
     }
-    
-    private var colorsSelecterView: some View {
-        HStack {
-            VStack {
-                ColorPicker("", selection: $startColor)
-                Text("Start color")
-                    .foregroundColor(.gray)
-                    .font(.system(size: 20))
-            }
-            
-            VStack {
-                ColorPicker("", selection: $endColor)
-                Text("End color")
-                    .foregroundColor(.gray)
-                    .font(.system(size: 20))
-            }
-        }
-    }
-    
     
     var dragGesture: some Gesture {
         DragGesture()
             .updating($gestureOffset) { value, state, transaction in
                 state = value.translation
-                onChangeMenuOffset()
+                onChangeSettingsOffset()
             }
             .onEnded { value in
-                let maxHeight = UIScreen.main.bounds.height / 3.0
+                let maxHeight = UIScreen.main.bounds.height / 5
                 
                 withAnimation {
-                    if -currentMenuOffsetY > maxHeight / 2 {
-                        currentMenuOffsetY = -maxHeight
+                    if -currentSettingsOffsetY > maxHeight / 2 {
+                        currentSettingsOffsetY = -maxHeight
                     } else {
-                        currentMenuOffsetY = 0
+                        currentSettingsOffsetY = 0
                     }
-                    lastMenuOffsetY = currentMenuOffsetY
+                    lastSettingsOffsetY = currentSettingsOffsetY
                 }
             }
     }
     
-    private func onChangeMenuOffset() {
+    private var circleGradient: LinearGradient {
+        LinearGradient(colors: [.lockedGradientMiddle.opacity(0.5), .circleButtonGradientTop.opacity(0.6)], startPoint: .topLeading
+                       , endPoint: .bottomTrailing)
+    }
+    
+    private var climateBackgroundGradient: LinearGradient {
+        LinearGradient(colors: [.lockButtonGradientBottom, .unlockedGradientTop, .unlockedGradientBottom], startPoint: .top, endPoint: .bottom)
+    }
+    
+    private var climateIndicatorGradient: LinearGradient {
+        LinearGradient(colors: [ .climateIndicatorGradientLight, .climateIndicatorGradientDark.opacity(0.6)], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+    
+    var alertView: some View {
+        VStack(spacing: 15) {
+            Text("Tesla Support")
+                .foregroundStyle(.white)
+                .fontWeight(.bold)
+            ControlGroup {
+                if let url = URL(string: "https://www.tesla.com/support") {
+                    Link(destination: url, label: {
+                        Text("Open website")
+                    })
+                    .foregroundColor(.topGradient)
+            }
+                Button("Cancel") {
+                    withAnimation {
+                        shouldShowAlert.toggle()
+                    }
+                }
+                .foregroundStyle(.textGray)
+            }
+            .frame(width: 200, height: 30)
+            
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 20).fill(.climateIndicatorGradientLight))
+        .shadow(radius: 10)
+    }
+    
+    private func onChangeSettingsOffset() {
         DispatchQueue.main.async {
-            self.currentMenuOffsetY = gestureOffset.height + lastMenuOffsetY
+            self.currentSettingsOffsetY = gestureOffset.height + lastSettingsOffsetY
         }
     }
     
 }
 
 #Preview {
-    ClimatControlView()
+    ClimateControlView()
+        .environment(\.colorScheme, .dark)
 }

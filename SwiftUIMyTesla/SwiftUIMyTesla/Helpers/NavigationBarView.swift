@@ -10,6 +10,7 @@ import SwiftUI
 struct NavigationBarView: View {
     var headerText: String
     @Environment(\.dismiss) private var dismiss
+    @Binding  var isTapped: Bool
 
     var body: some View {
         HStack {
@@ -34,12 +35,14 @@ struct NavigationBarView: View {
             Spacer()
                 .frame(width: 60)
             Text(headerText)
-                .font(.system(size: 28, weight: .semibold))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(.white)
             Spacer()
                 .frame(width: 60)
             Button {
-                print("settings tapped")
+                withAnimation {
+                    isTapped.toggle()
+                }
             } label: {
                 Image("settingsImage")
                     .resizable()

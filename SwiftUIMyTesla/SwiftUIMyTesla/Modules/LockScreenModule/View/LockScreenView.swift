@@ -11,35 +11,48 @@ struct LockScreenView: View {
     
     var body: some View {
         NavigationView {
-            backgroundStackView {
-                VStack {
-                    HStack {
-                        Spacer()
-                        settingsButtonView
-                        NavigationLink(destination: SettingsView(), isActive: $isSettingsButtonTapped) {
+            ZStack {
+                SplashScreenView()
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            withAnimation(.easeInOut(duration: 1.7)) {
+                                splashScreenOpacity = 0.0
+                            }
+                        }
+                    }
+                    .opacity(splashScreenOpacity)
+                    .zIndex(1)
+                backgroundStackView {
+                    VStack {
+                        HStack {
+                            Spacer()
+                                .frame(height: 100)
+                            settingsButtonView
+                            Spacer()
+                                .frame(width: 30)
                         }
                         Spacer()
-                            .frame(width: 30)
+                            .frame(height: 50)
+                        welcomeTextView
+                        if shouldUnlockCar {
+                            openedCarView
+                        } else {
+                            closedCarView
+                        }
+                        Spacer()
+                        closeCarControlView
+                        Spacer()
+                            .frame(height: 100)
                     }
-                    Spacer()
-                        .frame(height: 50)
-                    welcomeTextView
-                    if shouldUnlockCar {
-                        openedCarView
-                    } else {
-                        closedCarView
-                    }
-                    Spacer()
-                    closeCarControlView
-                    Spacer()
-                        .frame(height: 100)
                 }
+                .navigation(destination: MainTabView(), isActive: $shouldNavigateToTabView)
             }
         }
     }
     
+    @State private var splashScreenOpacity: Double = 1
     @State private var shouldUnlockCar = false
-    @State private var isSettingsButtonTapped = false
+    @State private var shouldNavigateToTabView = false
     
     private var closeCarControlView: some View {
         Button {
@@ -86,7 +99,7 @@ struct LockScreenView: View {
     
     private var settingsButtonView: some View {
         Button {
-            isSettingsButtonTapped.toggle()
+                shouldNavigateToTabView.toggle()
         } label: {
             Image("settingsImage")
                 .resizable()
@@ -101,8 +114,8 @@ struct LockScreenView: View {
 
         }
         .circleButtonConfiguration()
+        .disabled(!shouldUnlockCar)
     }
-    
     
     private var welcomeTextView: some View {
         VStack(spacing: 10) {
@@ -111,6 +124,7 @@ struct LockScreenView: View {
             Text("Welcome back")
                 .font(.system(size: 38, weight: .bold))
         }
+        .scaleEffect(shouldUnlockCar ? 1 : 0)
         .opacity(shouldUnlockCar ? 1 : 0)
     }
     
@@ -132,19 +146,38 @@ struct LockScreenView: View {
     }
     
     private var lockedBackgroundGradient: LinearGradient {
-        LinearGradient(colors: [.lockedGradientTop, .lockedGradientMiddle, .lockedGradientBottom], startPoint: .top, endPoint: .bottom)
+        LinearGradient(
+            colors: [
+                .lockedGradientTop,
+                    .lockedGradientMiddle,
+                    .lockedGradientBottom
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
     
     private var unlockedBackgroundGradient: LinearGradient {
-        LinearGradient(colors: [.unlockedGradientTop, .unlockedGradientBottom], startPoint: .top, endPoint: .bottom)
+        LinearGradient(
+            colors: [
+                .unlockedGradientTop,
+                    .unlockedGradientBottom
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
     
     private var settingsGradient: LinearGradient {
-        LinearGradient(colors: [.lockedGradientMiddle.opacity(0.5), .circleButtonGradientTop.opacity(0.6)], startPoint: .topLeading
-                       , endPoint: .bottomTrailing)
+        LinearGradient(
+            colors: [
+                .lockedGradientMiddle.opacity(0.5),
+                    .circleButtonGradientTop.opacity(0.6)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing)
+        
     }
-    
-  
     
     private func backgroundStackView<Content: View>(content: () -> Content) -> some View {
          ZStack {

@@ -22,7 +22,7 @@ struct SettingsView: View {
                     Spacer()
                         .frame(height: 40)
                     NavigationLink(
-                        destination: ClimatControlView(),
+                        destination: ClimateControlView(),
                         isActive: $shouldNavigateToClimatControlView,
                         label: {}
                     )

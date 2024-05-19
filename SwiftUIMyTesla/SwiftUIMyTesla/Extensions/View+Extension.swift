@@ -40,7 +40,32 @@ extension View {
         modifier(CircleButtonModifier())
     }
     
+    
     func lockImageConfiguration() -> some View {
         modifier(lockButtonConfiguration())
+    }
+    
+    func climateCircleIndicatorConfiguration() -> some View {
+        modifier(ClimateCircleIndicatorModifier())
+    }
+    
+    func climateCircleSettingConfiguration() -> some View {
+        modifier(ClimateCircleSettingModifier())
+    }
+    
+    func tabBarShadowConfiguration() -> some View {
+        modifier(MyTabBarModifier())
+    }
+    
+    func navigation<Destination: View>(destination: Destination, isActive: Binding<Bool>) -> some View {
+        modifier(NavigationModifier(destination: destination, isActive: isActive))
+    }
+
+    func teslaShadowConfiguration() -> some View {
+     modifier(TeslaLogoShadowModifier())
+    }
+    
+    func dropMenuCircleButtonConfiguration() -> some View {
+        modifier(DropMenuButtonCircleButtonImageModifier())
     }
 }
