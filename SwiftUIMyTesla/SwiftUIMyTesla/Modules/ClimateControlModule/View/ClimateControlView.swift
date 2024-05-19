@@ -44,7 +44,6 @@ struct ClimateControlView: View {
         }
         .navigationBarBackButtonHidden(true)
         
-        
     }
     
     

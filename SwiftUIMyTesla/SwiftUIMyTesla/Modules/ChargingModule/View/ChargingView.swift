@@ -29,16 +29,13 @@ struct ChargingView: View {
             ZStack {
                 VStack {
                     Spacer()
-                        .frame(height: 30)
+                        .frame(height: 60)
                     NavigationBarView(
                         headerText: Constants.Texts.navigationTitle,
                         isTapped: $isSettingsTapped
                     )
-                    Spacer()
-                        .frame(height: 10)
                     Image(Constants.Texts.carChargingImage)
-                    Spacer()
-                        .frame(height: 10)
+                        .frame(height: 170)
                     VStack(spacing: 50) {
                         CustomProgressView(progress: $progress)
                             .onReceive(timer) { _ in
@@ -56,13 +53,14 @@ struct ChargingView: View {
                     }
                     .padding()
                     Spacer()
-                        .frame(height: 40)
+                        .frame(height: 10)
                     superchargersDropListView
                     Spacer()
                 }
                 .frame(height: UIScreen.main.bounds.height)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     // MARK: - @States

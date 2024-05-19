@@ -29,8 +29,8 @@ struct SettingsView: View {
                     Spacer()
                 }
             }
-
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     private var headerView: some View {
