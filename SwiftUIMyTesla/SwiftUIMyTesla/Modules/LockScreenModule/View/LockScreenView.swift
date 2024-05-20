@@ -53,7 +53,7 @@ struct LockScreenView: View {
     @State private var splashScreenOpacity: Double = 1
     @State private var shouldUnlockCar = false
     @State private var shouldNavigateToTabView = false
-    
+
     private var closeCarControlView: some View {
         Button {
             withAnimation(.easeIn(duration: 1)) {
@@ -122,9 +122,8 @@ struct LockScreenView: View {
             Text("Hi")
                 .foregroundColor(.gray)
             Text("Welcome back")
-                .font(.system(size: 38, weight: .bold))
+                .font(.system(size: 32, weight: .bold))
         }
-        .scaleEffect(shouldUnlockCar ? 1 : 0)
         .opacity(shouldUnlockCar ? 1 : 0)
     }
     

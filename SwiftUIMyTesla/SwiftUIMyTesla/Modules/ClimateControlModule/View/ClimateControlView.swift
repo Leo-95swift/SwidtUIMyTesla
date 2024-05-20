@@ -17,10 +17,10 @@ struct ClimateControlView: View {
                         .frame(height: 60)
                     NavigationBarView(headerText: "CLIMATE", isTapped: $shouldShowAlert)
                     Spacer()
-                        .frame(height: 80)
+                        .frame(height: 40)
                     indicatorView
                     Spacer()
-                        .frame(height: 60)
+                        .frame(height: 40)
                     slidersView
                     Spacer()
                 }
@@ -28,7 +28,9 @@ struct ClimateControlView: View {
                 .frame(height: UIScreen.main.bounds.height)
                 bottomSheetView
                     .frame(height: UIScreen.main.bounds.height + 250)
-                    .background(RoundedRectangle(cornerRadius: 40).fill(.lockButtonGradientBottom))
+                    .background(RoundedRectangle(
+                        cornerRadius: 40)
+                        .fill(.lockButtonGradientBottom))
                     .ignoresSafeArea(.all, edges: .bottom)
                     .offset(y: UIScreen.main.bounds.height)
                     .offset(y: currentSettingsOffsetY)
@@ -43,15 +45,14 @@ struct ClimateControlView: View {
             
         }
         .navigationBarBackButtonHidden(true)
-        
     }
-    
     
     @Environment(\.dismiss) private var dismiss
     @GestureState private var gestureOffset = CGSize.zero
     @State private var currentSettingsOffsetY: CGFloat = 0.0
     @State private var lastSettingsOffsetY: CGFloat = 0.0
     @State private var acOffset = 0.0
+    @State private var acTurnedOff = 0.0
     @State private var fanOffset = 0.0
     @State private var heatOffset = 0.0
     @State private var autoOffset = 0.0
@@ -63,7 +64,7 @@ struct ClimateControlView: View {
     @State private var isExpanded = true
     @State private var isACOn: Bool = false
     @State private var shouldShowAlert = false
-    @State private var mainColor = Color.topGradient
+    @State private var mainColor = Color.yellow
     
     private var bottomSheetView: some View {
         VStack {
@@ -133,12 +134,18 @@ struct ClimateControlView: View {
                 } label: {
                     Image("acImage")
                         .renderingMode(.template)
-                        .foregroundColor(isACOn ? .topGradient : .textGray)
+                        .foregroundColor(isACOn ? mainColor : .textGray)
                 }
                 .climateCircleSettingConfiguration()
 
                 Spacer()
-                ClmateCustomSLider(value: $acValue, minValue: 15, maxValue: 30, offset: $acOffset, sliderProgressColor: $mainColor)
+                ClmateCustomSLider(
+                    value: $acValue,
+                    minValue: 15,
+                    maxValue: 30,
+                    offset: isACOn ? $acOffset : $acTurnedOff,
+                    sliderProgressColor: $mainColor
+                )
                     .frame(width: 190)
                 Spacer()
                     .frame(width: 20)
@@ -165,7 +172,13 @@ struct ClimateControlView: View {
 
 
                 Spacer()
-                ClmateCustomSLider(value: $fanValue, minValue: 15, maxValue: 30, offset: $fanOffset, sliderProgressColor: $mainColor)
+                ClmateCustomSLider(
+                    value: $fanValue,
+                    minValue: 15,
+                    maxValue: 30,
+                    offset: isACOn ? $fanOffset : $acTurnedOff,
+                    sliderProgressColor: $mainColor
+                )
                     .frame(width: 190)
                 Spacer()
                     .frame(width: 20)
@@ -190,7 +203,13 @@ struct ClimateControlView: View {
                 }
                 .climateCircleSettingConfiguration()
                 Spacer()
-                ClmateCustomSLider(value: $heatValue, minValue: 15, maxValue: 30, offset: $heatOffset, sliderProgressColor: $mainColor)
+                ClmateCustomSLider(
+                    value: $heatValue,
+                    minValue: 15,
+                    maxValue: 30,
+                    offset: isACOn ? $heatOffset : $acTurnedOff,
+                    sliderProgressColor: $mainColor
+                )
                     .frame(width: 190)
                 Spacer()
                     .frame(width: 20)
@@ -215,7 +234,13 @@ struct ClimateControlView: View {
                 .climateCircleSettingConfiguration()
 
                 Spacer()
-                ClmateCustomSLider(value: $autoValue, minValue: 15, maxValue: 30, offset: $autoOffset, sliderProgressColor: $mainColor)
+                ClmateCustomSLider(
+                    value: $autoValue,
+                    minValue: 15,
+                    maxValue: 30,
+                    offset: isACOn ? $autoOffset : $acTurnedOff,
+                    sliderProgressColor: $mainColor
+                )
                     .frame(width: 190)
                 Spacer()
                     .frame(width: 20)
@@ -229,9 +254,6 @@ struct ClimateControlView: View {
 
     private var bottomSheetHeaderView: some View {
         VStack {
-            Capsule()
-                .fill(.black)
-                .frame(width: 80, height: 4)
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("A/C is \(isACOn ? "ON" : "OFF")")

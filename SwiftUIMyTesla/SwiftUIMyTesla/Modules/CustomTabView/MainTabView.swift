@@ -14,10 +14,10 @@ struct MainTabView: View {
     var body: some View {
         CustomTabView(selection: $selectedTab) {
             VStack {
-                if selectedTab == 0 {
-                    SettingsView()
-                } else {
+                if selectedTab == 1 {
                     ChargingView()
+                } else  {
+                    SettingsView()
                 }
             }
             .transition(.opacity)

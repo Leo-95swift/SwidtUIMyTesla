@@ -40,7 +40,7 @@ struct CustomTabViewShape: Shape {
                 y: rect.minY + 10
             ))
         
-        // levaya tochka pered dugoi
+        // Левая точка перед дугой
         path.addQuadCurve(
             to: CGPoint(
                 x: rect.minX + 120,
@@ -101,23 +101,6 @@ struct CustomTabViewShape: Shape {
             // замыкаем путь
             path.closeSubpath()
             
-            return path
-        
-//        //pravaya tochka pered dugoi & control - radius centralnoy dugi
-//        path.addQuadCurve(to: CGPoint(x: rect.midX + 47, y: rect.minY + 10), control: CGPoint(x: rect.midX, y: rect.minY + 60))
-//        
-//        //pravaya verhnyaya tochka
-//        path.addQuadCurve(to: CGPoint(x: rect.maxX - 40, y: rect.minY + 2), control: CGPoint(x: rect.midX + 60, y: rect.minY - 5))
-//        
-//        // pravaya srednyaya tochka
-//        path.addQuadCurve(to: CGPoint(x: rect.maxX, y: rect.midY + 5), control: CGPoint(x: rect.maxX + 10, y: rect.minY + 20))
-//        
-//        // pravvaya niznyaya tochka s prostranstov
-//        path.addQuadCurve(to: CGPoint(x: rect.maxX - 30, y: rect.maxY), control: CGPoint(x: rect.maxX - 5, y: rect.maxY - 15))
-        
-        // pravvaya niznyaya tochka bez prostranstva
-//        path.addQuadCurve(to: CGPoint(x: rect.maxX, y: rect.maxY), control: CGPoint(x: rect.maxX, y: rect.maxY - 15))
-
         return path
     }
 }
