@@ -13,7 +13,6 @@ struct SettingsView: View {
     @State private var shouldNavigateToClimatControlView = false
     
     var body: some View {
-        NavigationView {
             backgroundStackView {
                 VStack {
                     headerView
@@ -28,7 +27,6 @@ struct SettingsView: View {
                     )
                     Spacer()
                 }
-            }
         }
         .navigationBarBackButtonHidden(true)
     }

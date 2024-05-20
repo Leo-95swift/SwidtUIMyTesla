@@ -16,8 +16,15 @@ struct SplashScreenView: View {
             Color.lockButtonGradientTop
                 .ignoresSafeArea()
             TeslaLogoForm()
-                .frame(width: 300, height: 240)
-                .foregroundColor(.white)
+                .frame(width: 300, height: 280)
+                .foregroundStyle(.linearGradient(
+                    colors: [
+                        .chargeGradientStart,
+                        .chargeGradientEnd
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ))
                 .teslaShadowConfiguration()
                 .opacity(opacity)
         }

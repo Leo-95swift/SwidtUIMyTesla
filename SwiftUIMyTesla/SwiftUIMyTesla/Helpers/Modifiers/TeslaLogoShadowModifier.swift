@@ -10,6 +10,6 @@ import SwiftUI
 struct TeslaLogoShadowModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .shadow(color: .black, radius: 25, x: 0, y: 0)
+            .shadow(color: .pink, radius: 45, x: 0, y: 10)
     }
 }
