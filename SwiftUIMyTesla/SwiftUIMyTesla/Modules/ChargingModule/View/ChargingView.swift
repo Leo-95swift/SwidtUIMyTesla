@@ -69,8 +69,8 @@ struct ChargingView: View {
     @State private var isExpanded = false
     @State private var firstOpacity: Double = 0
     @State private var secondOpacity: Double = 0
-    @State private var progress: Double = 65.0
-    @State private var chargeLimit: Double = 70.0
+    @State private var progress: Double = 75.0
+    @State private var chargeLimit: Double = 80.0
     
     // MARK: - Visual Elements
     
